@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
+	<classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
+	<classpathentry kind="lib" path="C:/UCaPE-J1.8-G2.4-Library/GroovyParallel-Groovy2.4-6-1-16.jar"/>
+	<classpathentry kind="lib" path="C:/UCaPE-J1.8-G2.4-Library/JCSP-Java1.8-23-11-15.jar"/>
+	<classpathentry kind="lib" path="C:/UCaPE-J1.8-G2.4-Library/junit.jar"/>
+	<classpathentry kind="lib" path="C:/UCaPE-J1.8-G2.4-Library/phwclasses.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
