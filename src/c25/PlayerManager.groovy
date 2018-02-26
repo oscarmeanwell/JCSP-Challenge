@@ -11,6 +11,7 @@ import org.jcsp.net2.mobile.*;
 import java.awt.event.*
 
 class PlayerManager implements CSProcess {
+	//channel explained as a diagram
 	DisplayList dList
 	ChannelOutputList playerNames
 	ChannelOutputList pairsWon
@@ -30,7 +31,7 @@ class PlayerManager implements CSProcess {
 	int boardSize = 6
 	
 	void run(){
-		
+		//graphics related information
 		int gap = 5
 		def offset = [gap, gap]
 		int graphicsPos = (side / 2)
@@ -73,9 +74,11 @@ class PlayerManager implements CSProcess {
 			}			
 		} // end createBoard
 		
+		//
 		def pairLocations = []
 		def colours = [Color.MAGENTA, Color.CYAN, Color.YELLOW, Color.PINK]
 		
+		//I think what ever this is doing, is graphics related,pairs distribution. Not important
 		def changePairs = {x, y, colour, p ->
 			def int xPos = offset[0]+(gap*x)+ (side*x)
 			def int yPos = offset[1]+(gap*y)+ (side*y)
@@ -92,6 +95,8 @@ class PlayerManager implements CSProcess {
 			dList.change(changeGraphics, 4 + (x*5*boardSize) + (y*5))
 		}
 	
+		//pairsMap is created and configured in the controller. 
+		//this has to be further discussed with Oscar
 		def pairsMatch = {pairsMap, cp ->
 			// cp is a list comprising two elements each of which is a list with the [x,y]
 			// location of a square
@@ -152,7 +157,9 @@ class PlayerManager implements CSProcess {
 			
 			// main loop
 			while (enroled) {
+				//list for two positions
 				def chosenPairs = [null, null]
+				//fill in the standard details, based on infromation recieved from the controller
 				createBoard()
 				dList.change (display, 0)
 				toController.write(new GetGameDetails(id: myPlayerId))
@@ -162,38 +169,60 @@ class PlayerManager implements CSProcess {
 				def playerMap = gameDetails.playerDetails
 				def pairsMap = gameDetails.pairsSpecification
 				def playerIds = playerMap.keySet()
-				playerIds.each { p ->
-					def pData = playerMap.get(p)
-					playerNames[p].write(pData[0])
-					pairsWon[p].write(" " + pData[1])
-				}
+					playerIds.each { p ->
+						def pData = playerMap.get(p)
+						playerNames[p].write(pData[0])
+						pairsWon[p].write(" " + pData[1])
+					}
 				
 				// now use pairsMap to create the board
+				//pairlocs stors a list of all positions already selected 
+				//"who claimed what" is not recorded.
+				//I think this is where we must make adjustment. 
+				//this sort of thing should be called by everyone whenever a move was made. 
+				//So I think a new process which forces the code below to update the board for every player
 				def pairLocs = pairsMap.keySet()
 				pairLocs.each {loc ->
 					changePairs(loc[0], loc[1], Color.LIGHT_GRAY, -1)
 				}
+				
 				def currentPair = 0
 				def notMatched = true
 				while ((chosenPairs[1] == null) && (enroled) && (notMatched)) {
 					getValidPoint.write (new GetValidPoint( side: side,
 															gap: gap,
 															pairsMap: pairsMap))					
+					//Aleternator - is a click a valid position on board or not
 					switch ( outerAlt.select() ) {
+						//not a valid position
 						case WITHDRAW:	
 							withdrawButton.read()
 							toController.write(new WithdrawFromGame(id: myPlayerId))
 							enroled = false
-							break						
+							break		
+						//mouse is selecting a valid square
 						case VALIDPOINT:
+							//get the location of the valid position
 							def vPoint = ((SquareCoords)validPoint.read()).location
+							//add it to the cosen pairs
 							chosenPairs[currentPair] = vPoint
+							//increment the position in the array
 							currentPair = currentPair + 1
+							//not sure
 							def pairData = pairsMap.get(vPoint)
 							changePairs(vPoint[0], vPoint[1], pairData[1], pairData[0])
+							
 							def matchOutcome = pairsMatch(pairsMap, chosenPairs)
+						
+							// pairsMatch return an int to state if they are a match or not.
+							//2 = match
 							if ( matchOutcome == 2)  {
+								//a pair is found ask for a next one. 
+								//because we need to make this turn based, we must create a while loop 
+								//forcing the player to actually choose next two.
 								nextPairConfig.write("SELECT NEXT PAIR")
+								//inner alternator. This whole thing should be rewritten, like we had to 
+								//for question 5 in the lab book. So that we dont have inner and outer.
 								switch (innerAlt.select()){
 									case NEXT:
 										nextButton.read()
@@ -211,6 +240,7 @@ class PlayerManager implements CSProcess {
 										enroled = false
 										break
 								} // end inner switch
+							//1 = not a match, a pair was not found.
 							} else if ( matchOutcome == 1) {
 								notMatched = false
 								toController.write(new ClaimPair ( id: myPlayerId,
