@@ -10,3 +10,20 @@
 ## Tasks to do
 * Create a diagram showing how the system processes communicate
 * Comment the code
+
+
+### To Explain
+
+Michal
+* PlayerManager
+* PlayerInterface
+* Player
+
+Jostein
+* MouseBuffer
+* Matcher
+
+Oscar
+* ControllerManager
+* ControllerInterface
+* Controller
