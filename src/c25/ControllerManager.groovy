@@ -19,6 +19,7 @@ import org.jcsp.net2.mobile.*;
 // which they can then join
 
 class ControllerManager implements CSProcess{
+	//All passes as arguments
 	DisplayList dList
 	ChannelOutput IPlabelConfig
 	ChannelOutput statusConfig
@@ -26,7 +27,7 @@ class ControllerManager implements CSProcess{
 	ChannelOutputList playerNames
 	ChannelOutputList pairsWon
 	
-	int maxPlayers = 8
+	int maxPlayers = 8 
 	int side = 50
 	int minPairs = 6
 	int maxPairs = 18
@@ -35,21 +36,29 @@ class ControllerManager implements CSProcess{
 	void run(){
 		
 		def int gap = 5
+		// array of [5, 5]
 		def offset = [gap, gap]
 		int graphicsPos = (side / 2)
-		
+		// 55*6 + 5 = 335
 		def rectSize = ((side+gap) *boardSize) + gap
+		//
 		int pairsRange = maxPairs - minPairs
-		
+		// [7, 6, 5, 4, 3, 2, 1, 0]
 		def availablePlayerIds = ((maxPlayers-1) .. 0).collect{it}
 		
 		//println "$availablePlayerIds"
+		// Function that isnt called currentley
+		// Takes min and pairsRange and returns random in in that range
+		// generatePairsNumber(1,5) could yield 1,2,3,4,5 
 		def generatePairsNumber = { min, range ->
 			def rng = new Random()
 			def randomAmount = rng.nextInt(range)
 			return min + randomAmount
 		}
 		def displaySize = 4 + (5 * boardSize * boardSize)
+		
+		//Two lists of Graphics Commands
+		//Make an array position for every square (184)
 		GraphicsCommand[] display = new GraphicsCommand[displaySize]
 		GraphicsCommand[] changeGraphics = new GraphicsCommand[5]
 		changeGraphics[0] = new GraphicsCommand.SetColor(Color.WHITE)
@@ -65,10 +74,16 @@ class ControllerManager implements CSProcess{
 			display[2] = new GraphicsCommand.SetColor(Color.BLACK)
 			display[3] = new GraphicsCommand.DrawRect(0, 0, rectSize, rectSize)
 			def cg = 4
+			//The two for loops draw a 6x6 grid
+			//cg ends up been 184, this is because 184 graphics commands are required to build the board
 			for ( x in 0..(boardSize-1)){
+				//For 6
 				for ( y in 0..(boardSize-1)){
-					def int xPos = offset[0]+(gap*x)+ (side*x)
-					def int yPos = offset[1]+(gap*y)+ (side*y)
+					//For 6
+					//offset originally [5,5]
+					//Builds grid along the corridor and down the stairs
+					def int xPos = offset[0]+(gap*x)+ (side*x) //5, 60, 115, 170, 225, 280
+					def int yPos = offset[1]+(gap*y)+ (side*y) //5, 60, 115, 170, 255, 280
 					//print " $x, $y, $xPos, $yPos, $cg, "
 					display[cg] = new GraphicsCommand.SetColor(Color.WHITE)
 					cg = cg+1
@@ -90,9 +105,10 @@ class ControllerManager implements CSProcess{
 		def colours = [Color.MAGENTA, Color.CYAN, Color.YELLOW, Color.PINK]
 		def pairsMap =[:]
 		
+		//Create [0:1]:null, [0:2]:null - [5:5]:null
 		def initPairsMap = {
-			for ( x in 0 ..< boardSize){
-				for ( y in 0 ..< boardSize){
+			for ( x in 0 ..< boardSize){ //for 6
+				for ( y in 0 ..< boardSize){ //for 6
 					pairsMap.put([x,y], null)
 				}
 			}
@@ -101,6 +117,7 @@ class ControllerManager implements CSProcess{
 		def changePairs = {x, y, colour, p ->
 			def int xPos = offset[0]+(gap*x)+ (side*x)
 			def int yPos = offset[1]+(gap*y)+ (side*y)
+			//draw the new colored square and write the pair number
 			changeGraphics[0] = new GraphicsCommand.SetColor(colour)
 			changeGraphics[1] = new GraphicsCommand.FillRect(xPos, yPos, side, side)
 			changeGraphics[2] = new GraphicsCommand.SetColor(Color.BLACK)
@@ -113,6 +130,7 @@ class ControllerManager implements CSProcess{
 				changeGraphics[4] = new GraphicsCommand.DrawString("   ", xPos, yPos)
 		}
 		
+		//create 18 pairs as 6*6 grid, 36 squares all are a pair so create 36/2 pairs (18)
 		def createPairs = {np ->
 			//println "createpairs: $np"
 			/*
@@ -122,15 +140,19 @@ class ControllerManager implements CSProcess{
 			 */
 			def rng = new Random()
 			initPairsMap()
+			// 1..18
 			for (p in 1..np){
+				//Get random location e.g. [3,1]
 				def x1 = rng.nextInt(boardSize)
 				def y1 = rng.nextInt(boardSize)
 				//println "[x1, y1] = [$x1, $y1]"
 				while ( pairsMap.get([x1,y1]) != null){
+					//if that place already set get another 
 					//println "first repeated random location [$x1, $y1]"
 					x1 = rng.nextInt(boardSize)
 					y1 = rng.nextInt(boardSize)	
 				}
+				//put coordinates, number (pair number) and color
 				pairsMap.put([x1, y1], [p, colours[p%4]])
 				changePairs(x1, y1, colours[p%4], p)
 				dList.change(changeGraphics, 4 + (x1*5*boardSize) + (y1*5))
@@ -146,21 +168,26 @@ class ControllerManager implements CSProcess{
 				pairsMap.put([x2, y2], [p, colours[p%4]])
 				changePairs(x2, y2, colours[p%4], p)
 				dList.change(changeGraphics, 4 + (x2*5*boardSize) + (y2*5))
+				//pass in the second pair
 			}
 		} // end createPairs
 		
 		// create a Node and the fromPlayers net channel
 		def nodeAddr = new TCPIPNodeAddress (3000)
+		//bind to port 3000, get IP, update lbl
 		Node.getInstance().init (nodeAddr)
 		IPlabelConfig.write(nodeAddr.getIpAddress())
 		//println "Controller IP address = ${nodeAddr.getIpAddress()}"
 		
+		//net channel
 		def fromPlayers = NetChannel.net2one()
 		def fromPlayersLoc = fromPlayers.getLocation()
 		//println "Controller: fromPlayer channel location - ${fromPlayersLoc.toString()}"
 
+		//Setup channel ouput list for every possible player
 		def toPlayers = new ChannelOutputList()
 		for ( p in 0..<maxPlayers) toPlayers.append(null)
+		//set current player to 0
 		def currentPlayerId = 0
 		def playerMap = [:]
 		
@@ -178,6 +205,7 @@ class ControllerManager implements CSProcess{
 			gameId = gameId + 1
 			createPairs (nPairs)
 			statusConfig.write("Running")
+			// While game not over
 			def running = (pairsUnclaimed != 0)
 			while (running){
 				def o = fromPlayers.read()
