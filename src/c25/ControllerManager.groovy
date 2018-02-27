@@ -1,14 +1,14 @@
 package c25
 
-import org.jcsp.awt.*
-import org.jcsp.lang.*
-import org.jcsp.util.*
-import org.jcsp.groovy.*
+import jcsp.awt.*
+import jcsp.lang.*
+import jcsp.util.*
+import jcsp.groovy.*
 import java.awt.*
 import java.awt.Color.*
-import org.jcsp.net2.*;
-import org.jcsp.net2.tcpip.*;
-import org.jcsp.net2.mobile.*;
+import jcsp.net2.*;
+import jcsp.net2.tcpip.*;
+import jcsp.net2.mobile.*;
 
 // modify this so that the controller asks the min and max number of pairs
 // then generates them randomly

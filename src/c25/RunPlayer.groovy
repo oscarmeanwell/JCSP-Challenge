@@ -1,9 +1,9 @@
 package c25
 
-import org.jcsp.awt.*
-import org.jcsp.lang.*
-import org.jcsp.util.*
-import org.jcsp.groovy.*
+import jcsp.awt.*
+import jcsp.lang.*
+import jcsp.util.*
+import jcsp.groovy.*
 
 player = new Player ( )
 

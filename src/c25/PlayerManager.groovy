@@ -1,13 +1,13 @@
 package c25
 
-import org.jcsp.awt.*
-import org.jcsp.groovy.*
-import org.jcsp.lang.*
+import jcsp.awt.*
+import jcsp.groovy.*
+import jcsp.lang.*
 import java.awt.*
 import java.awt.Color.*
-import org.jcsp.net2.*;
-import org.jcsp.net2.tcpip.*;
-import org.jcsp.net2.mobile.*;
+import jcsp.net2.*;
+import jcsp.net2.tcpip.*;
+import jcsp.net2.mobile.*;
 import java.awt.event.*
 
 class PlayerManager implements CSProcess {

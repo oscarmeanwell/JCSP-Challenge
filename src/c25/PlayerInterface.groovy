@@ -1,10 +1,10 @@
 package c25
 
 import java.awt.*
-import org.jcsp.awt.*
-import org.jcsp.lang.*
-import org.jcsp.util.*
-import org.jcsp.groovy.*
+import jcsp.awt.*
+import jcsp.lang.*
+import jcsp.util.*
+import jcsp.groovy.*
 
 class PlayerInterface implements CSProcess{
 	ActiveCanvas gameCanvas

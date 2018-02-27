@@ -1,7 +1,7 @@
 package c25
 
-import org.jcsp.groovy.*
-import org.jcsp.lang.*
+import jcsp.groovy.*
+import jcsp.lang.*
 
 class Matcher implements CSProcess {
 	ChannelInput getValidPoint

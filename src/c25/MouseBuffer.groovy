@@ -1,7 +1,7 @@
 package c25
 
-import org.jcsp.groovy.*
-import org.jcsp.lang.*
+import jcsp.groovy.*
+import jcsp.lang.*
 import java.awt.event.*
 import java.awt.event.MouseEvent
 
